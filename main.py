@@ -1,10 +1,31 @@
 import pandas as pd
+import chardet
 
 # -------------------------------
-# STEP 1: LOAD DATA
+# STEP 1: DETECT ENCODING
+# -------------------------------
+def detect_encoding(file_path):
+    print("Detecting file encoding...")
+
+    with open(file_path, "rb") as f:
+        raw_data = f.read()
+
+    result = chardet.detect(raw_data)
+
+    print("Encoding result:", result)
+
+    # Warning for low confidence
+    if result['confidence'] < 0.5:
+        print("Warning: Low encoding confidence. File may contain mixed or corrupted encoding.")
+
+    return result
+
+
+# -------------------------------
+# STEP 2: LOAD DATA
 # -------------------------------
 def load_data(file_path):
-    print("Loading dataset...")
+    print("\nLoading dataset...")
 
     try:
         df = pd.read_csv(file_path, encoding='utf-8', sep=None, engine='python')
@@ -17,7 +38,7 @@ def load_data(file_path):
 
 
 # -------------------------------
-# STEP 2: CLEAN COLUMN NAMES
+# STEP 3: CLEAN COLUMN NAMES
 # -------------------------------
 def clean_column_names(df):
     df.columns = (
@@ -37,14 +58,14 @@ def clean_column_names(df):
 
 
 # -------------------------------
-# STEP 3: DROP UNUSED COLUMNS
+# STEP 4: DROP UNUSED COLUMNS
 # -------------------------------
 def drop_unused_columns(df):
     return df.drop(columns=["unnamed:_8"], errors='ignore')
 
 
 # -------------------------------
-# STEP 4: HANDLE INITIAL MISSING VALUES
+# STEP 5: HANDLE INITIAL MISSING VALUES
 # -------------------------------
 def handle_missing_values(df):
     df['content_rating'] = df['content_rating'].fillna("Not Rated")
@@ -58,7 +79,7 @@ def handle_missing_values(df):
 
 
 # -------------------------------
-# SAFE NUMERIC CONVERSION
+# Step 6: NUMERIC CONVERSION
 # -------------------------------
 def safe_numeric(series, pattern=None):
     cleaned = series.astype(str)
@@ -70,7 +91,7 @@ def safe_numeric(series, pattern=None):
 
 
 # -------------------------------
-# STEP 5: CLEAN NUMERIC COLUMNS
+# STEP 7: CLEAN NUMERIC COLUMNS
 # -------------------------------
 def clean_numeric_columns(df):
     print("\nCleaning numeric columns...")
@@ -106,7 +127,7 @@ def clean_numeric_columns(df):
 
 
 # -------------------------------
-# STEP 6: FINAL CLEANUP
+# STEP 8: FINAL CLEANUP
 # -------------------------------
 def final_cleanup(df):
     df = df.drop_duplicates().copy()
@@ -123,7 +144,7 @@ def final_cleanup(df):
 
 
 # -------------------------------
-# STEP 7: FIX ENCODING (SAFE)
+# STEP 9: FIX ENCODING (SAFE)
 # -------------------------------
 def fix_encoding(df):
     def safe_fix(text):
@@ -143,21 +164,18 @@ def fix_encoding(df):
 
 
 # -------------------------------
-# STEP 8: HANDLE FINAL MISSING DATA
+# STEP 10: HANDLE FINAL MISSING DATA
 # -------------------------------
 def handle_missing_final(df):
     print("\nHandling missing values...")
 
-    # Remove completely empty rows
     df = df.dropna(how='all')
 
-    # Drop rows missing critical identifiers
     df = df.dropna(subset=[
         'imdb_title_id',
         'original_title'
     ])
 
-    # Fill numeric fields
     df['release_year'] = df['release_year'].fillna(df['release_year'].median())
     df['duration'] = df['duration'].fillna(df['duration'].median())
     df['score'] = df['score'].fillna(df['score'].mean())
@@ -166,23 +184,23 @@ def handle_missing_final(df):
 
 
 # -------------------------------
-# STEP 9: ENFORCE FINAL DATA TYPES
+# STEP 11: ENFORCE FINAL DATA TYPES
 # -------------------------------
 def enforce_final_types(df):
     print("\nEnforcing final data types...")
 
-    df['votes'] = df['votes'].astype('Int64')
-    df['release_year'] = df['release_year'].astype('Int64')
-    df['duration'] = df['duration'].astype('Int64')
+    df['votes'] = df['votes'].astype('int64')
+    df['release_year'] = df['release_year'].astype('int64')
+    df['duration'] = df['duration'].astype('int64')
 
     if (df['income'].dropna() % 1 == 0).all():
-        df['income'] = df['income'].astype('Int64')
+        df['income'] = df['income'].astype('int64')
 
     return df
 
 
 # -------------------------------
-# STEP 10: VALIDATION
+# STEP 12: VALIDATION
 # -------------------------------
 def validate_data(df):
     print("\n--- VALIDATION ---")
@@ -206,7 +224,7 @@ def validate_data(df):
 
 
 # -------------------------------
-# STEP 11: SAVE DATA
+# STEP 13: SAVE DATA
 # -------------------------------
 def save_data(df, output_path):
     df.to_csv(output_path, index=False)
@@ -219,6 +237,8 @@ def save_data(df, output_path):
 def main():
     input_file = "messy_IMDB_dataset.csv"
     output_file = "clean_IMDB_dataset.csv"
+
+    detect_encoding(input_file)
 
     df = load_data(input_file)
     df = clean_column_names(df)
