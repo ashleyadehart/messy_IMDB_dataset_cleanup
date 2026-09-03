@@ -13,7 +13,7 @@ The goal of this project was to identify and correct these issues and produce a 
 This project demonstrates practical skills in:
 
 - Data quality assessment
-- Data cleaning and preprocessing
+- Data cleaning and pre-processing
 - Exploratory data analysis (EDA)
 - Missing-value handling
 - Duplicate and empty-record detection
@@ -24,7 +24,6 @@ This project demonstrates practical skills in:
 - Data validation
 - Python programming
 - Pandas
-- Jupyter Notebook
 
 ## Project Structure
 
@@ -303,7 +302,7 @@ Potential future enhancements include:
 
 **Messy IMDb Dataset — David Fuente Herraiz**
 
-The dataset is available through Kaggle and was specifically created as an example of dirty data that requires preprocessing and cleaning.
+The dataset is available through Kaggle and was specifically created as an example of dirty data that requires pre-processing and cleaning.
 
 ## AI Usage
 
